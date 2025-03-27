@@ -1,4 +1,4 @@
-using Unity.Netcode;
+п»їusing Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Text;
@@ -14,40 +14,28 @@ public class ClientManager : MonoBehaviour
     private void Start()
     {
         loginButton.onClick.AddListener(SendLoginData);
-        NetworkManager.Singleton.OnServerStarted += RegisterMessageHandlers;
-        NetworkManager.Singleton.OnClientConnectedCallback += (clientId) =>
-        {
-            Debug.Log($"Подключено к серверу как {clientId}");
-        };
+
         NetworkManager.Singleton.OnClientConnectedCallback += OnConnected;
-        Invoke("RegisterMessageHandlers", 2);
+
+        ConnectToServer();
+        RegisterMessageHandler();
     }
 
-    private void Awake()
-    {
-        // Обработчик ответа от сервера
-        //NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("AuthResponse", (senderClientId, reader) =>
-        //{
-        //    reader.ReadValueSafe(out bool isAuthorized);
-        //    messageText.text = isAuthorized ? "Вход выполнен!" : "Ошибка: неверные данные";
 
-        //    if (isAuthorized)
-        //    {
-        //        UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
-        //    }
-        //});
-    }
-
-    private void RegisterMessageHandlers()
+    private void RegisterMessageHandler()
     {
-        if (NetworkManager.Singleton.IsClient || NetworkManager.Singleton.IsServer)
+        print(NetworkManager.Singleton.IsClient);
+        if (NetworkManager.Singleton.IsClient)
         {
-            print("Создаем колбек на принятие сообщений");
+            Debug.Log("вњ… РљР»РёРµРЅС‚ РїРѕРґРїРёСЃС‹РІР°РµС‚СЃСЏ РЅР° AuthResponse...");
             NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("AuthResponse", (senderClientId, reader) =>
             {
-                
+                Debug.Log("рџ“© РљР»РёРµРЅС‚ РїРѕР»СѓС‡РёР» AuthResponse!");
+
                 reader.ReadValueSafe(out bool isAuthorized);
-                messageText.text = isAuthorized ? "Вход выполнен!" : "Ошибка: неверные данные";
+                Debug.Log($"рџ“Њ Р”РµРєРѕРґРёСЂРѕРІР°РЅРЅС‹Р№ РѕС‚РІРµС‚: {isAuthorized}");
+
+                messageText.text = isAuthorized ? "Р’С…РѕРґ РІС‹РїРѕР»РЅРµРЅ!" : "РћС€РёР±РєР°: РЅРµРІРµСЂРЅС‹Рµ РґР°РЅРЅС‹Рµ";
 
                 if (isAuthorized)
                 {
@@ -59,13 +47,13 @@ public class ClientManager : MonoBehaviour
 
     private void OnConnected(ulong clientId)
     {
-        Debug.Log($"Подключено к серверу как {clientId}");
+        Debug.Log($"РџРѕРґРєР»СЋС‡РµРЅРѕ Рє СЃРµСЂРІРµСЂСѓ РєР°Рє {clientId}");
     }
 
     public void ConnectToServer()
     {
         NetworkManager.Singleton.StartClient();
-        messageText.text = "Подключаемся...";
+        messageText.text = "РџРѕРґРєР»СЋС‡Р°РµРјСЃСЏ...";
     }
 
     private void SendLoginData()
@@ -73,7 +61,7 @@ public class ClientManager : MonoBehaviour
         if (!NetworkManager.Singleton.IsConnectedClient)
         {
             ConnectToServer();
-            Invoke(nameof(SendLoginData), 1f); // Подождём 1 секунду перед повторной попыткой
+            Invoke(nameof(SendLoginData), 1f); // РџРѕРґРѕР¶РґС‘Рј 1 СЃРµРєСѓРЅРґСѓ РїРµСЂРµРґ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРѕР№
             return;
         }
 
@@ -91,6 +79,6 @@ public class ClientManager : MonoBehaviour
 
         NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("AuthRequest", NetworkManager.ServerClientId, writer);
 
-        messageText.text = "Отправка данных...";
+        messageText.text = "РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С…...";
     }
 }
